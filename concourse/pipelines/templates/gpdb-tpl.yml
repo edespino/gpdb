@@ -208,7 +208,6 @@ groups:
   - icw_gporca_icproxy_centos6
   - icw_planner_icproxy_centos6
   - icw_planner_ictcp_centos6
-  - fips_centos7
 {% endif %}
 {% if "centos6" in os_types and "CLI" in test_sections %}
   - gpexpand
@@ -231,6 +230,9 @@ groups:
   - icw_planner_icproxy_ubuntu18.04
 {% endif %}
   - gate_icw_end
+{% endif %}
+{% if "centos7" in os_types and "FIPS" in test_sections %}
+  - fips_centos7
 {% endif %}
 {% if "Interconnect" in test_sections %}
   ## --------------------------------------------------------------------
@@ -313,6 +315,12 @@ groups:
   - test_gpdb_clients_windows
 {% endif %}
 
+{% if "centos7" in os_types and "FIPS" in test_sections %}
+- name: FIPS
+  jobs:
+  - fips_centos7
+{% endif %}
+
 {% if "ICW" in test_sections %}
 ## ======================================================================
 
@@ -326,7 +334,6 @@ groups:
   - icw_planner_icproxy_centos6
   - icw_planner_ictcp_centos6
   - compile_gpdb_centos6
-  - fips_centos7
 {% endif %}
 {% if "centos6" in os_types and "CLI" in test_sections %}
   - pg_upgrade
@@ -471,7 +478,7 @@ resource_types:
 ## ======================================================================
 
 resources:
-{% if "ResourceGroups" in test_sections or "CLI" in test_sections %}
+{% if "ResourceGroups" in test_sections or "CLI" in test_sections or "FIPS" in test_sections %}
 - name: ccp_src
   type: git
   source:
@@ -480,10 +487,11 @@ resources:
     uri: {{ccp-git-remote}}
 
 {% if "centos6" in os_types or
-      "ICW"     in test_sections %}
+      "FIPS"    in test_sections %}
 - name: terraform
   <<: *terraform_cluster
 
+{% if "CLI"     in test_sections %}
 - name: terraform_1
   <<: *terraform_cluster
 
@@ -495,6 +503,7 @@ resources:
   source:
     repository: alpine
     tag: latest
+{% endif %}
 
 - name: ccp-image
   type: docker-image
@@ -640,14 +649,16 @@ resources:
   source:
     repository: pivotaldata/gpdb6-centos7-build
     tag: latest
+{% endif %}
 
+## {% if "centos7" in os_types and "FIPS" not in test_sections %}
 - name: gpdb6-centos7-test
   type: docker-image
   source:
     repository: pivotaldata/gpdb6-centos7-test
     tag: latest
+## {% endif %}
 
-{% endif %}
 {% if "oracle7" in os_types %}
 - name: gpdb6-oracle7-test
   type: docker-image
@@ -965,6 +976,7 @@ jobs:
 
 {% if "centos6" in os_types %}
 - name: compile_gpdb_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1002,6 +1014,7 @@ jobs:
 {% endif %}
 {% if "centos7" in os_types %}
 - name: compile_gpdb_centos7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1059,6 +1072,7 @@ jobs:
 {% endif %}
 {% if "ubuntu18.04" in os_types %}
 - name: compile_gpdb_ubuntu18.04
+  serial: true
   plan:
     - in_parallel:
         steps:
@@ -1162,6 +1176,7 @@ jobs:
 
 {% if "centos6" in os_types %}
 - name: icw_planner_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1177,6 +1192,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos6-test
   - task: ic_gpdb
+    tags: [icw-centos6]
     file: gpdb_src/concourse/tasks/ic_gpdb_binary_swap.yml
     image: gpdb6-centos6-test
     params:
@@ -1190,6 +1206,7 @@ jobs:
       file: sqldump/dump.sql.xz
 
 - name: icw_gporca_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1201,6 +1218,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos6-test
   - task: ic_gpdb
+    tags: [icw-centos6]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos6-test
     params:
@@ -1209,6 +1227,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_icproxy_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1220,6 +1239,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos6-test
   - task: ic_gpdb
+    tags: [icw-centos6]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos6-test
     params:
@@ -1228,6 +1248,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_gporca_icproxy_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1239,6 +1260,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos6-test
   - task: ic_gpdb
+    tags: [icw-centos6]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos6-test
     params:
@@ -1247,6 +1269,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_ictcp_centos6
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1258,6 +1281,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos6-test
   - task: ic_gpdb
+    tags: [icw-centos6]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos6-test
     params:
@@ -1267,6 +1291,7 @@ jobs:
 {% endif %}
 {% if "centos7" in os_types %}
 - name: icw_gporca_centos7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1278,6 +1303,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos7-test
   - task: ic_gpdb
+    tags: [icw-centos7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos7-test
     params:
@@ -1286,6 +1312,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_centos7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1297,6 +1324,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos7-test
   - task: ic_gpdb
+    tags: [icw-centos7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos7-test
     params:
@@ -1305,6 +1333,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_gporca_icproxy_centos7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1316,6 +1345,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos7-test
   - task: ic_gpdb
+    tags: [icw-centos7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos7-test
     params:
@@ -1324,6 +1354,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_icproxy_centos7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1335,6 +1366,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-centos7-test
   - task: ic_gpdb
+    tags: [icw-centos7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-centos7-test
     params:
@@ -1345,6 +1377,7 @@ jobs:
 {% endif %}
 {% if "oracle7" in os_types %}
 - name: icw_gporca_oracle7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1356,6 +1389,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-oracle7-test
   - task: ic_gpdb
+    tags: [icw-ol7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-oracle7-test
     params:
@@ -1364,6 +1398,7 @@ jobs:
       CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_oracle7
+  serial: true
   plan:
   - in_parallel:
       steps:
@@ -1375,6 +1410,7 @@ jobs:
         trigger: [[ test_trigger ]]
       - get: gpdb6-oracle7-test
   - task: ic_gpdb
+    tags: [icw-ol7]
     file: gpdb_src/concourse/tasks/ic_gpdb.yml
     image: gpdb6-oracle7-test
     params:
@@ -1385,6 +1421,7 @@ jobs:
 {% endif %}
 {% if "ubuntu18.04" in os_types %}
 - name: icw_gporca_ubuntu18.04
+  serial: true
   plan:
     - in_parallel:
         steps:
@@ -1396,6 +1433,7 @@ jobs:
           trigger: [[ test_trigger ]]
         - get: gpdb6-ubuntu18.04-test
     - task: ic_gpdb
+      tags: [icw-ubuntu18]
       file: gpdb_src/concourse/tasks/ic_gpdb.yml
       image: gpdb6-ubuntu18.04-test
       params:
@@ -1404,6 +1442,7 @@ jobs:
         CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_ubuntu18.04
+  serial: true
   plan:
     - in_parallel:
         steps:
@@ -1415,6 +1454,7 @@ jobs:
           trigger: [[ test_trigger ]]
         - get: gpdb6-ubuntu18.04-test
     - task: ic_gpdb
+      tags: [icw-ubuntu18]
       file: gpdb_src/concourse/tasks/ic_gpdb.yml
       image: gpdb6-ubuntu18.04-test
       params:
@@ -1423,6 +1463,7 @@ jobs:
         CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_gporca_icproxy_ubuntu18.04
+  serial: true
   plan:
     - in_parallel:
         steps:
@@ -1434,6 +1475,7 @@ jobs:
           trigger: [[ test_trigger ]]
         - get: gpdb6-ubuntu18.04-test
     - task: ic_gpdb
+      tags: [icw-ubuntu18]
       file: gpdb_src/concourse/tasks/ic_gpdb.yml
       image: gpdb6-ubuntu18.04-test
       params:
@@ -1442,6 +1484,7 @@ jobs:
         CONFIGURE_FLAGS: {{configure_flags}}
 
 - name: icw_planner_icproxy_ubuntu18.04
+  serial: true
   plan:
     - in_parallel:
         steps:
@@ -1453,6 +1496,7 @@ jobs:
           trigger: [[ test_trigger ]]
         - get: gpdb6-ubuntu18.04-test
     - task: ic_gpdb
+      tags: [icw-ubuntu18]
       file: gpdb_src/concourse/tasks/ic_gpdb.yml
       image: gpdb6-ubuntu18.04-test
       params:
@@ -1462,7 +1506,56 @@ jobs:
 
 {% endif %}
 
+- name: gate_icw_end
+  plan:
+  - in_parallel:
+      steps:
+{% if "centos6" in os_types %}
+      - get: bin_gpdb_centos6
+        passed:
+        - icw_gporca_centos6
+        - icw_planner_centos6
+        - icw_gporca_icproxy_centos6
+        - icw_planner_icproxy_centos6
+        - icw_planner_ictcp_centos6
+{% if "Extensions" in test_sections %}
+        - icw_extensions_gpcloud_centos6
+{% endif %}
+{% endif %}
+{% if "centos6" in os_types %}
+      - get: icw_planner_centos6_dump
+        passed:
+        - icw_planner_centos6
+{% endif %}
+      - get: gpdb_src
+        passed:
+{% if "centos6" in os_types %}
+        - icw_gporca_centos6
+        - icw_planner_centos6
+        - icw_gporca_icproxy_centos6
+        - icw_planner_icproxy_centos6
+        - icw_planner_ictcp_centos6
+{% if "Extensions" in test_sections %}
+        - icw_extensions_gpcloud_centos6
+{% endif %}
+{% endif %}
 {% if "centos7" in os_types %}
+        - icw_gporca_centos7
+        - icw_gporca_icproxy_centos7
+        - icw_planner_icproxy_centos7
+{% endif %}
+        trigger: true
+{% if pipeline_configuration == "prod" and "centos6" in os_types %}
+  - put: bin_gpdb_centos6_icw_green
+    params:
+      file: bin_gpdb_centos6/bin_gpdb.tar.gz
+{% endif %}
+
+{% endif %}
+
+
+
+{% if "centos7" in os_types and "FIPS" in test_sections %}
 - name: fips_centos7
   plan:
   - in_parallel:
@@ -1531,52 +1624,7 @@ jobs:
     <<: *set_failed
 {% endif %}
 
-- name: gate_icw_end
-  plan:
-  - in_parallel:
-      steps:
-{% if "centos6" in os_types %}
-      - get: bin_gpdb_centos6
-        passed:
-        - icw_gporca_centos6
-        - icw_planner_centos6
-        - icw_gporca_icproxy_centos6
-        - icw_planner_icproxy_centos6
-        - icw_planner_ictcp_centos6
-{% if "Extensions" in test_sections %}
-        - icw_extensions_gpcloud_centos6
-{% endif %}
-{% endif %}
-{% if "centos6" in os_types %}
-      - get: icw_planner_centos6_dump
-        passed:
-        - icw_planner_centos6
-{% endif %}
-      - get: gpdb_src
-        passed:
-{% if "centos6" in os_types %}
-        - icw_gporca_centos6
-        - icw_planner_centos6
-        - icw_gporca_icproxy_centos6
-        - icw_planner_icproxy_centos6
-        - icw_planner_ictcp_centos6
-{% if "Extensions" in test_sections %}
-        - icw_extensions_gpcloud_centos6
-{% endif %}
-{% endif %}
-{% if "centos7" in os_types %}
-        - icw_gporca_centos7
-        - icw_gporca_icproxy_centos7
-        - icw_planner_icproxy_centos7
-{% endif %}
-        trigger: true
-{% if pipeline_configuration == "prod" and "centos6" in os_types %}
-  - put: bin_gpdb_centos6_icw_green
-    params:
-      file: bin_gpdb_centos6/bin_gpdb.tar.gz
-{% endif %}
 
-{% endif %}
 {% if "Interconnect" in test_sections %}
 ## ======================================================================
 ##  ___ _   _ _____ _____ ____   ____ ___  _   _ _   _ _____ ____ _____
