@@ -31,6 +31,18 @@ function gen_env(){
 		source /usr/local/greenplum-db-devel/greenplum_path.sh
 		cd "\${1}/gpdb_src"
 		source gpAux/gpdemo/gpdemo-env.sh
+	EOF
+
+    ## Add CCache support
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        cat >> /opt/run_test.sh <<-EOF
+		export CCACHE_DIR="$(pwd)/ccache_dir"
+		export CCACHE_BASEDIR="$(pwd)"
+		export PATH=/usr/lib64/ccache:\$PATH
+	EOF
+    fi
+
+    cat >> /opt/run_test.sh <<-EOF
 		make -s ${MAKE_TEST_COMMAND}
 	EOF
 
@@ -61,10 +73,19 @@ function _main() {
       ;;
     esac
 
+    ## Add CCache support
+    add_ccache_support ${TEST_OS}
+
     time install_and_configure_gpdb
     time setup_gpadmin_user
     time make_cluster
     time gen_env
+
+    ## Update ownership of CCache
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        chown -R gpadmin $CCACHE_DIR
+    fi
+
     time run_test
 
     if [ "${TEST_BINARY_SWAP}" == "true" ]; then
@@ -75,6 +96,9 @@ function _main() {
         chmod 777 sqldump
         su gpadmin -c ./gpdb_src/concourse/scripts/dumpdb.bash
     fi
+
+    ## Display CCache Stats
+    display_ccache_stats
 }
 
 _main "$@"
