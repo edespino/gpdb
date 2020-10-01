@@ -37,6 +37,7 @@ def cmake_configure(src_dir, build_type, output_dir, cxx_compiler = None, cxxfla
         shutil.rmtree("build")
     os.mkdir("build")
     cmake_args = ["cmake",
+                  "-D", "CMAKE_RULE_MESSAGES:BOOL=OFF",
                   "-D", "CMAKE_INSTALL_PREFIX=" + output_dir,
                   "-D", "CMAKE_BUILD_TYPE=" + build_type]
     if cxx_compiler:
@@ -55,6 +56,7 @@ def cmake_configure(src_dir, build_type, output_dir, cxx_compiler = None, cxxfla
 
 def make():
     return subprocess.call(["make",
+        "-s",
         "-j" + str(num_cpus()),
         "-l" + str(2 * num_cpus()),
         ],
