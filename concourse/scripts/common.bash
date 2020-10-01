@@ -182,6 +182,14 @@ function add_ccache_support(){
             fi
 
             export PATH=/usr/lib64/ccache:$PATH
+        elif [[ "${_TARGET_OS}" = "ubuntu" ]]; then
+            # Install CCache
+            apt update -y
+            apt install -y ccache
+            apt-get clean
+            rm -rf /var/lib/apt/lists/*
+
+            export PATH=/usr/lib/ccache:$PATH
         fi
 
         export CCACHE_DIR=$(pwd)/ccache_dir
