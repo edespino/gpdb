@@ -3,5 +3,10 @@ image_resource:
   type: docker-image
 inputs:
   - name: gpdb_src
+caches:
+  - path: ccache_dir
+params:
+  TEST_OS: ""
+  USE_CCACHE:
 run:
   path: gpdb_src/concourse/scripts/unit_tests_gporca.bash

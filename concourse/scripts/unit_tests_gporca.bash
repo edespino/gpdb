@@ -1,7 +1,10 @@
 #!/bin/bash
 set -exo pipefail
 
+CWDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 GPDB_SRC_PATH=${GPDB_SRC_PATH:=gpdb_src}
+
+source "${CWDIR}/common.bash"
 
 function build_xerces
 {
@@ -26,9 +29,15 @@ function test_orca
 
 function _main
 {
+  ## Add CCache Support (?)
+  add_ccache_support ${TEST_OS}
+
   mkdir gpdb_src/gpAux/ext
   build_xerces
   test_orca
+
+  ## Display CCache Stats
+  display_ccache_stats
 }
 
 _main "$@"

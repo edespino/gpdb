@@ -154,3 +154,56 @@ function tar_coverage() {
         tar --remove-files -cf "$prefix.tar" *
     popd
 }
+
+function add_ccache_support(){
+
+    _TARGET_OS=$1
+
+    ## Add CCache support
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        if [[ "${_TARGET_OS}" = "centos" ]]; then
+            # Install CCache
+            yum install -y -q -d1 epel-release
+            yum install -y -q -d1 ccache
+            yum remove  -y -q -d1 epel-release
+
+            # Add gcc link
+            if [ ! -h /usr/lib64/ccache/gcc ]; then
+                pushd /usr/lib64/ccache
+                ln -s ../../bin/ccache /usr/lib64/ccache/gcc
+                popd
+            fi
+
+            # Add g++ link
+            if [ ! -h /usr/lib64/ccache/g++ ]; then
+                pushd /usr/lib64/ccache
+                ln -s ../../bin/ccache /usr/lib64/ccache/g++
+                popd
+            fi
+
+            export PATH=/usr/lib64/ccache:$PATH
+        fi
+
+        export CCACHE_DIR=$(pwd)/ccache_dir
+        export CCACHE_BASEDIR=$(pwd)
+
+        ## Display CCache Stats
+        display_ccache_stats
+    fi
+}
+
+function display_ccache_stats(){
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        cat <<EOF
+
+======================================================================
+                            CCACHE STATS
+----------------------------------------------------------------------
+
+$( ccache --show-stats)
+
+======================================================================
+
+EOF
+    fi
+}

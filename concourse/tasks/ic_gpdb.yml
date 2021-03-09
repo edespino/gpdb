@@ -6,6 +6,8 @@ inputs:
   - name: bin_gpdb
 outputs:
   - name: sqldump
+caches:
+  - path: ccache_dir
 params:
   DUMP_DB: "false"
   MAKE_TEST_COMMAND: ""
@@ -13,5 +15,6 @@ params:
   TEST_OS: ""
   CONFIGURE_FLAGS: ""
   WITH_MIRRORS:
+  USE_CCACHE:
 run:
   path: gpdb_src/concourse/scripts/ic_gpdb.bash

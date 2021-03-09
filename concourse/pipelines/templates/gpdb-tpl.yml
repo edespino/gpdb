@@ -812,6 +812,7 @@ jobs:
       TARGET_OS_VERSION: 7
       BLD_TARGETS: "clients"
       RC_BUILD_TYPE_GCS: ((rc-build-type-gcs))
+      USE_CCACHE: "true"
   - in_parallel:
       steps:
       - put: bin_gpdb_centos7
@@ -906,6 +907,7 @@ jobs:
       MAKE_TEST_COMMAND: -k PGOPTIONS='-c optimizer=on' installcheck-world
       TEST_OS: centos
       CONFIGURE_FLAGS: ((configure_flags))
+      USE_CCACHE: "true"
 
 - name: icw_planner_centos7
   plan:
@@ -930,6 +932,7 @@ jobs:
       TEST_BINARY_SWAP: ((test-binary-swap))
       CONFIGURE_FLAGS: ((configure_flags))
       DUMP_DB: "true"
+      USE_CCACHE: "true"
   - put: icw_planner_centos7_dump
     params:
       file: sqldump/dump.sql.xz
@@ -955,6 +958,7 @@ jobs:
       MAKE_TEST_COMMAND: -k PGOPTIONS='-c gp_interconnect_type=proxy -c optimizer=on' installcheck-world
       TEST_OS: centos
       CONFIGURE_FLAGS: ((configure_flags))
+      USE_CCACHE: "true"
 
 - name: icw_planner_icproxy_centos7
   plan:
@@ -977,6 +981,7 @@ jobs:
       MAKE_TEST_COMMAND: -k PGOPTIONS='-c gp_interconnect_type=proxy -c optimizer=off' installcheck-world
       TEST_OS: centos
       CONFIGURE_FLAGS: ((configure_flags))
+      USE_CCACHE: "true"
 
 - name: icw_gporca_ictcp_centos7
   plan:
@@ -998,6 +1003,7 @@ jobs:
     params:
       MAKE_TEST_COMMAND: -k PGOPTIONS='-c gp_interconnect_type=tcp -c optimizer=on' installcheck-world
       TEST_OS: centos
+      USE_CCACHE: "true"
 
 - name: unit_tests_gporca_centos7
   plan:
@@ -1010,6 +1016,9 @@ jobs:
   - task: unit_tests_gporca
     file: gpdb_src/concourse/tasks/unit_tests_gporca.yml
     image: gpdb7-centos7-build
+    params:
+      TEST_OS: centos
+      USE_CCACHE: "true"
 
 {% endif %}
 {% if "ubuntu18.04" in os_types %}
