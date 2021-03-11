@@ -162,25 +162,7 @@ function add_ccache_support(){
     ## Add CCache support
     if [[ "${USE_CCACHE}" = "true" ]]; then
         if [[ "${_TARGET_OS}" = "centos" ]]; then
-            # Install CCache
-            yum install -y -q -d1 epel-release
-            yum install -y -q -d1 ccache
-            yum remove  -y -q -d1 epel-release
-
-            # Add gcc link
-            if [ ! -h /usr/lib64/ccache/gcc ]; then
-                pushd /usr/lib64/ccache
-                ln -s ../../bin/ccache /usr/lib64/ccache/gcc
-                popd
-            fi
-
-            # Add g++ link
-            if [ ! -h /usr/lib64/ccache/g++ ]; then
-                pushd /usr/lib64/ccache
-                ln -s ../../bin/ccache /usr/lib64/ccache/g++
-                popd
-            fi
-
+            # Enable CCache use
             export PATH=/usr/lib64/ccache:$PATH
         fi
 
