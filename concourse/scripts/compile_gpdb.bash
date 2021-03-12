@@ -156,7 +156,7 @@ function git_info() {
 function unittest_check_gpdb() {
   pushd ${GPDB_SRC_PATH}
     source ${GREENPLUM_INSTALL_DIR}/greenplum_path.sh
-    make GPROOT=/usr/local -s unittest-check -j$(nproc)
+    make GPROOT=/usr/local -s unittest-check
   popd
 }
 
