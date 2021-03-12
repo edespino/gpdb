@@ -13,6 +13,8 @@ outputs:
   - name: gpdb_artifacts
 run:
   path: gpdb_src/concourse/scripts/compile_gpdb.bash
+caches:
+  - path: ccache_dir
 params:
   TARGET_OS:
   TARGET_OS_VERSION:
@@ -21,3 +23,4 @@ params:
   CONFIGURE_FLAGS:
   RC_BUILD_TYPE_GCS:
   SKIP_UNITTESTS:
+  USE_CCACHE:

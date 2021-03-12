@@ -178,3 +178,37 @@ function install_python_requirements_on_multi_host() {
         done < /tmp/hostfile_all
     deactivate
 }
+
+function add_ccache_support(){
+
+    _TARGET_OS=$1
+
+    ## Add CCache support
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        if [[ "${_TARGET_OS}" = "centos" ]]; then
+            export PATH=/usr/lib64/ccache:$PATH
+        fi
+
+        export CCACHE_DIR=$(pwd)/ccache_dir
+        export CCACHE_BASEDIR=$(pwd)
+
+        ## Display CCache Stats
+        display_ccache_stats
+    fi
+}
+
+function display_ccache_stats(){
+    if [[ "${USE_CCACHE}" = "true" ]]; then
+        cat <<EOF
+
+======================================================================
+                            CCACHE STATS
+----------------------------------------------------------------------
+
+$( ccache --show-stats)
+
+======================================================================
+
+EOF
+    fi
+}
