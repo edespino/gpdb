@@ -60,7 +60,7 @@ def configure(cxx_compiler, cxxflags, cflags, output_dir):
         cwd = "build")
 
 def make():
-    return subprocess.call(["make", "-s", "-j" + str(num_cpus())], cwd="build")
+    return subprocess.call(["make", "-j" + str(num_cpus())], cwd="build")
 
 def install():
     return subprocess.call(["make", "install"], cwd="build")
