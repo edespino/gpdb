@@ -25,6 +25,7 @@
                       'reindexdb',
                       'gpperfmon',
                       'gpinitsystem',
+                      'gpreload',
                       'gpstart'] %}
 {% set aa_Test_suites = ['Planner_centos6',
                          'Orca_centos6',
