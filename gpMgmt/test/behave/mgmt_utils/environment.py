@@ -38,7 +38,7 @@ def before_feature(context, feature):
         start_database_if_not_started(context)
         drop_database_if_exists(context, 'gpreload_db')
         create_database(context, 'gpreload_db')
-        context.conn = dbconn.connect(dbconn.DbURL(dbname='gpreload_db'), unsetSearchPath=False)
+        context.conn = dbconn.connect(dbconn.DbURL(dbname='gpreload_db'))
         context.dbname = 'gpreload_db'
 
     if 'minirepro' in feature.tags:
